@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'counter_bloc.dart';
+import 'counter_event.dart';
 
 void main() {
   runApp(MyApp());
@@ -30,6 +32,7 @@ final String title;
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  final _counterBloc = CounterBloc();
 
   void _incrementCounter() {
     setState(() {
@@ -46,6 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
 
+
     return Scaffold(
       appBar: AppBar(
          
@@ -55,36 +59,48 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
          
          
-        child: Column(
+        child:StreamBuilder(stream: _counterBloc.counter,
+          initialData:0,
+          builder: (context, snapshot) {
+          return Container(
+            child: Column(
 
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  'You have pushed the button this many times:',
+                ),
+                Text(
+                  '${snapshot.data}',
+                  style: Theme.of(context).textTheme.headline4,
+                ),
+              ],
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
+          );
+        },)
       ),
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
-            onPressed: _incrementCounter,
+            onPressed: () => {_counterBloc.counterEventSink.add(IncrementEvent())},
             tooltip: 'Increment',
             child: Icon(Icons.add),
           ),
           SizedBox(width: 10,),
           FloatingActionButton(
-            onPressed: _decrementCounter,
+            onPressed: () => {_counterBloc.counterEventSink.add(DecrementEvent())},
             tooltip: 'Decrement',
             child: Icon(Icons.remove),
           ),
         ],
       )
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _counterBloc.dispose();
   }
 }
